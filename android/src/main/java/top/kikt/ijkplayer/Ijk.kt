@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.media.AudioManager
 import android.net.Uri
 import android.util.Base64
+import android.util.Log
+import android.view.TextureView
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import top.kikt.ijkplayer.entity.IjkOption
@@ -176,14 +178,31 @@ class Ijk(private val registry: PluginRegistry.Registrar, private val options: M
         }
     }
 
+    private fun screenShot1(): Bitmap? {
+        Log.d("[SLab] ijk.kt", "screenShot1")
+        return mediaPlayer.frameBitmap;
+    }
+    private fun screenShot2(): Bitmap? {
+        Log.d("[SLab] ijk.kt", "screenShot2")
+        val textureView = TextureView(registry.activity())
+        textureView.surfaceTexture = textureEntry.surfaceTexture()
+        return textureView.bitmap;
+    }
+
     private fun screenShot(): ByteArray? {
-        val frameBitmap = mediaPlayer.frameBitmap
+        Log.d("[SLab] ijk.kt", "screenShot")
+
+        var frameBitmap = screenShot1()
+        if(frameBitmap == null) frameBitmap = screenShot2()
+
         return if (frameBitmap != null) {
+            Log.d("[SLab] ijk.kt", "compressing frameBitmap")
             val outputStream = ByteArrayOutputStream()
             frameBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
             frameBitmap.recycle()
             outputStream.toByteArray()
         } else {
+            Log.d("[SLab] ijk.kt", "no frameBitmap")
             null
         }
     }
